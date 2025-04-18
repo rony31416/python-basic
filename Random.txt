@@ -1,0 +1,124 @@
+    
+
+Step-by-Step Guide to Evaluate Bangla TTS with a Larger Dataset
+
+1. Download and Prepare the Dataset
+
+Download the Dataset: 
+
+Extract the Files: 
+
+Inspect the Data:  
+
+
+2. Set Up the Environment
+
+ 
+
+!git clone https://github.com/saiful9379/Bangla_TTS.git
+%cd Bangla_TTS
+!pip install TTS==0.14.3
+!pip install bangla==0.0.2
+!pip install wget
+
+3. Load the Pretrained Bangla TTS Model
+
+ 
+
+import os
+from modules.model_download import download_file
+from inference import model_loading, bangla_tts
+
+root_dir = os.getcwd()
+GENDER = "female"  # or "male" based on your preference
+
+# Download the model
+model_path, config_path = download_file(
+    root_dir=root_dir,
+    output_path="models",
+    gender=GENDER
+)
+
+# Load the model
+tts_bn_model = model_loading(
+    model_path=model_path,
+    config_path=config_path
+)
+
+4. Generate Speech for the Dataset
+
+ 
+
+import pandas as pd
+import soundfile as sf
+import os
+
+# Load the dataset's transcription file
+# Replace 'transcriptions.csv' with the actual transcription file name
+df = pd.read_csv('bangla_tts_dataset/transcriptions.csv')
+
+# Create an output directory for the generated audio
+output_dir = 'generated_audio'
+os.makedirs(output_dir, exist_ok=True)
+
+# Iterate through the dataset and generate audio
+for idx, row in df.iterrows():
+    text = row['text']  # Replace 'text' with the actual column name
+    filename = f"{output_dir}/sample_{idx}.wav"
+    
+    # Generate audio
+    audio = bangla_tts(
+        model=tts_bn_model,
+        text=text,
+        is_male=(GENDER == "male"),
+        is_e2e_vits=True
+    )
+    
+    # Save the generated audio
+    sf.write(filename, audio, 22050)
+
+5. Evaluate the TTS System
+
+   
+
+Note:  
+
+6. Optional: Visualize Spectrograms
+
+ 
+
+import matplotlib.pyplot as plt
+import numpy as np
+import librosa
+import librosa.display
+
+# Load the generated audio
+y, sr = librosa.load('generated_audio/sample_0.wav')
+
+# Generate the spectrogram
+D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
+
+# Display the spectrogram
+plt.figure(figsize=(10, 6))
+librosa.display.specshow(D, sr=sr, x_axis='time', y_axis='log')
+plt.title('Spectrogram')
+plt.colorbar(format='%+2.0f dB')
+plt.show()
+
+
+---
+
+Summary:
+
+Dataset: 
+
+Model: 
+
+Evaluation:  
+
+
+ 
+
+---
+
+
